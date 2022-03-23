@@ -58,7 +58,7 @@ DONstan_dat <- list(
   
 ###rstan fitting###
  seed = 314159
- iter = 1000
+ iter = 2000
  # fileprefix <- "DON"
  
  DONstan_dat <- list(
@@ -129,6 +129,7 @@ data_df <- data.frame(cell=cell,x=x,ys=ys,CellLine=cells[cell])
   
 pred_df <- data.frame()
 load("DON_stanfit.RData")
+set.seed(314159)
 fitparms_df <- as.data.frame(rstan::extract(stan_fit))[1:500,]
 for (cellnum in 1:length(unique(cell))) {
     cat(cellnum,"...",sep="")
@@ -169,7 +170,8 @@ for (cellnum in 1:length(unique(cell))) {
   cells <- unique(DON_dat$Cell.line)
   pec10 <- list()
   load("DON_stanfit.RData")
-  fitparms_df <- as.data.frame(rstan::extract(stan_fit))[1:500,]
+  set.seed(314159)
+  fitparms_df <- as.data.frame(rstan::extract(stan_fit))
   ec10names <- paste("ec10",seq(1,length(cells)),sep=".")
   ec10_df <- fitparms_df[,ec10names]
   names(ec10_df) <- as.character(cells)
@@ -193,9 +195,10 @@ for (cellnum in 1:length(unique(cell))) {
             row.names = FALSE)
 
 ### EC10 Population GM and GSD values
-  ec10.gsd <- exp(as.data.frame(extract(stan_fit,"sd_x10")))
-  ec10.gm <- exp(as.data.frame(extract(stan_fit,"m_x10")))
-  ec10.pop <- cbind(ec10.gm,ec10.gsd)
+  load("DON_stanfit.RData")
+  set.seed(314159)
+  fitparms_df <- as.data.frame(rstan::extract(stan_fit))
+  ec10.pop <- exp(fitparms_df[,c("m_x10","sd_x10")])
   names(ec10.pop) <- c("EC10.GM","EC10.GSD")
   write.csv(ec10.pop,file="EC10_pop.csv")
   write.csv(t(apply(ec10.pop,2,quantile,prob=c(0.025,0.5,0.975))),
@@ -206,8 +209,37 @@ for (cellnum in 1:length(unique(cell))) {
   ggplot(ec10.pop)+geom_histogram(aes(x=EC10.GSD,y=..density..))+
     scale_x_log10()+annotation_logticks(side="b")+theme_bw()
   ggsave("EC10_pop.GSD.pdf",height=3,width=5)
+  prior.dens <- data.frame(xlog10=seq(0,1.5,0.01))
+  prior.dens$density.gsd <- dlnorm(prior.dens$xlog10,meanlog=log(0.221),sdlog=log(1.89))
+  prior.dens$x.gsd <- 10^prior.dens$xlog10
   
-### EC10 deciles ###
+  ggplot(ec10.pop)+geom_histogram(aes(x=EC10.GSD,y=..density..))+
+    geom_line(aes(x.gsd,density.gsd),data=prior.dens)+
+    geom_vline(xintercept=10^(0.5/qnorm(0.99)),color="red",linetype="dotted")+
+    scale_x_log10(limits=c(1,10))+annotation_logticks(side="b")+theme_bw()
+  ggsave("EC10_pop.GSD_compare_prior.pdf",height=3,width=5)
+  
+  prior.dens$x.tdvf05 <- prior.dens$x.gsd^qnorm(0.95)
+  prior.dens$density.tdvf05 <- prior.dens$density.gsd/qnorm(0.95)
+  ec10.pop$TDVF05 <- ec10.pop$EC10.GSD^qnorm(0.95)
+  ggplot(ec10.pop)+geom_histogram(aes(x=TDVF05,y=..density..))+
+    geom_line(aes(x.tdvf05,density.tdvf05),data=prior.dens)+
+    geom_vline(xintercept=10^(0.5),color="red",linetype="dotted")+
+    scale_x_log10(limits=c(1,30))+annotation_logticks(side="b")+theme_bw()
+  ggsave("EC10_pop.TDVF05_compare_prior.pdf",height=3,width=5)
+  ec10.pop$TDVF01 <- ec10.pop$EC10.GSD^qnorm(0.99)
+  prior.dens$x.tdvf01 <- prior.dens$x.gsd^qnorm(0.99)
+  prior.dens$density.tdvf01 <- prior.dens$density.gsd/qnorm(0.99)
+  ggplot(ec10.pop)+geom_histogram(aes(x=TDVF01,y=..density..))+
+    geom_line(aes(x.tdvf01,density.tdvf01),data=prior.dens)+
+    geom_vline(xintercept=10^(0.5),color="red",linetype="dotted")+
+    scale_x_log10(limits=c(1,30))+annotation_logticks(side="b")+theme_bw()
+  ggsave("EC10_pop.TDVF01_compare_prior.pdf",height=3,width=5)  
+
+  write.csv(t(apply(ec10.pop,2,quantile,prob=c(0.025,0.5,0.975))),
+            "Table-EC10.pop_posteriors.csv")
+  
+  ### EC10 deciles ###
     decilefunc <- function(v) {
       d <- as.integer(cut(as.numeric(v),c(quantile(v,probs=(0:9/10)),Inf),
                           include.lowest=TRUE))
@@ -247,83 +279,3 @@ for (cellnum in 1:length(unique(cell))) {
     ec10_summary <- ec10_summary[order(ec10_summary$EC10_50),]
     write.csv(ec10_summary,file="DON_EC10_summary_deciles.csv",
               row.names = FALSE)
-###extract TDVF values###
-    load("DON_stanfit.Rdata")
-    ec10.med.new <- extract(stan_fit,"ec10_quants[6]")
-    tdvf.01.new <- extract(stan_fit,"ec10_quant_ratios[1]")
-    tdvf.05.new <- extract(stan_fit,"ec10_quant_ratios[3]")
-    ec10.gm.new <- extract(stan_fit,"m_x10")
-    ec10.gsd.new <- extract(stan_fit,"sd_x10")
-
-    ec10.med.new <- as.data.frame(ec10.med.new)
-    tdvf.01.new <- as.data.frame(tdvf.01.new)
-    tdvf.05.new <- as.data.frame(tdvf.05.new)
-    ec10.gm.new <- exp(as.data.frame(ec10.gm.new))
-    ec10.gsd.new <- exp(as.data.frame(ec10.gsd.new))
-    tdvf.01.alt <- ec10.gsd.new^qnorm(0.99)
-    tdvf.05.alt <- ec10.gsd.new^qnorm(0.95)
-    
-    colnames(tdvf.01.new) <- "TDVF.01"
-    colnames(tdvf.05.new) <- "TDVF.05"
-    colnames(tdvf.01.alt) <- "TDVF.01"
-    colnames(tdvf.05.alt) <- "TDVF.05"
-  #  ec10.med.new <- melt(ec10.med.new)
-  #  ec10.med.new$group <- "EC10.Med"
-  #  tdvf.01.new <- melt(tdvf.01.new)
-  #  tdvf.01.new$group <- "TDVF.01"
-  #  tdvf.05.new <- melt(tdvf.05.new)
-  #  tdvf.05.new$group <- "TDVF.05"
-    
-    # ggplot(tdvf.01.new) + geom_boxplot(aes(x=TDVF.01),outlier.shape = NA) +
-    #   scale_x_log10() + xlab("TDVF01") + 
-    #   annotation_logticks(sides="b") + coord_cartesian() + theme_classic()
-    # ggsave("Replicates_boxplot_TDVF01.pdf")
-    # ggsave("Replicates_boxplot_TDVF01.png")
-    # 
-    # ggplot(tdvf.05.new) + geom_boxplot(aes(x=TDVF.05),outlier.shape = NA) +
-    #   scale_x_log10() + xlab("TDVF05") + 
-    #   annotation_logticks(sides="b") + coord_cartesian() + theme_classic()
-    # ggsave("Replicates_boxplot_TDVF05.pdf")
-    # ggsave("Replicates_boxplot_TDVF05.png")
-    
-    ggplot(tdvf.01.new) + geom_histogram(aes(x=TDVF.01)) +
-     scale_x_log10() + xlab("TDVF01") + ylab("DON") +
-     annotation_logticks(sides="b") + coord_cartesian() + theme_classic()
-    ggsave("Replicates_histogram_TDVF01.pdf")
-    
-    ggplot(tdvf.01.alt) + geom_histogram(aes(x=TDVF.01)) +
-      scale_x_log10() + xlab("TDVF01") + ylab("DON") +
-      annotation_logticks(sides="b") + coord_cartesian() + theme_classic()
-    ggsave("Replicates_histogram_TDVF01.alt.pdf")
-    
-    ggplot(tdvf.05.new) + 
-      geom_histogram(aes(x=TDVF.05), color="black", fill="white") +
-      scale_x_log10(limits = c(1, 50), 
-                    breaks=c(1, 3.16, 10, 20, 30, 40, 50), 
-                    labels=c(1, 3.16, 10, 20, 30, 40, 50)) +
-      scale_y_continuous(expand = c(0, 0))+
-      xlab("TDVF05") + 
-      annotation_logticks(sides="b") + coord_cartesian() + 
-      theme_classic()+
-      theme(axis.text.x = element_text(size = 15), 
-            axis.text.y = element_text(size = 15), 
-            axis.title = element_text(size = 20), 
-            axis.title.y=element_blank())+
-      geom_vline(xintercept=3.16, color="red", linetype="dotted")
-    ggsave("Replicates_histogram_TDVF05.pdf", width=10, height=8)
-
-    ggplot(tdvf.05.alt) + 
-      geom_histogram(aes(x=TDVF.05), color="black", fill="white") +
-      scale_x_log10(limits = c(1, 50), 
-                    breaks=c(1, 3.16, 10, 20, 30, 40, 50), 
-                    labels=c(1, 3.16, 10, 20, 30, 40, 50)) +
-      scale_y_continuous(expand = c(0, 0))+
-      xlab("TDVF05") + 
-      annotation_logticks(sides="b") + coord_cartesian() + 
-      theme_classic()+
-      theme(axis.text.x = element_text(size = 15), 
-            axis.text.y = element_text(size = 15), 
-            axis.title = element_text(size = 20), 
-            axis.title.y=element_blank())+
-      geom_vline(xintercept=3.16, color="red", linetype="dotted")
-    ggsave("Replicates_histogram_TDVF05.alt.pdf", width=10, height=8)
