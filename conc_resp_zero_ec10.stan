@@ -66,34 +66,34 @@ generated quantities {
 	vector[Ni] ec025;		// Concentration at which the relative response is 2.5%
 	vector[Ni] ec01;		// Concentration at which the relative response is 1%
 	
-	real ec99_median;			// Median ec99
-	real ec975_median;			// Median ec975
-	real ec95_median;			// Median ec95
-	real ec90_median;			// Median ec90
-	real ec50_median;			// Median ec50
-	real ec10_median;			// Median ec10
-	real ec05_median;			// Median ec05
-	real ec025_median;			// Median ec025
-	real ec01_median;			// Median ec01
-	
-	vector[Nquants] ec99_quants;	// Quantiles ec99
-	vector[Nquants] ec99_quant_ratios;	// Ratios of median to quantiles ec99
-	vector[Nquants] ec975_quants;	// Quantiles ec975
-	vector[Nquants] ec975_quant_ratios; // Ratios of median to quantiles ec975
-	vector[Nquants] ec95_quants;	// Quantiles ec95
-	vector[Nquants] ec95_quant_ratios; // Ratios of median to quantiles ec95
-	vector[Nquants] ec90_quants;	// Quantiles ec90
-	vector[Nquants] ec90_quant_ratios; // Ratios of median to quantiles ec90
-	vector[Nquants] ec50_quants;	// Quantiles ec50
-	vector[Nquants] ec50_quant_ratios; // Ratios of median to quantiles ec50
-	vector[Nquants] ec10_quants;	// Quantiles 
-	vector[Nquants] ec10_quant_ratios;	// Ratios of median to quantiles
-	vector[Nquants] ec05_quants;	// Quantiles ec05
-	vector[Nquants] ec05_quant_ratios; // Ratios of median to quantiles ec05
-	vector[Nquants] ec025_quants;	// Quantiles ec02.5
-	vector[Nquants] ec025_quant_ratios;	// Ratios of median to quantiles ec02.5
-	vector[Nquants] ec01_quants;	// Quantiles ec01
-	vector[Nquants] ec01_quant_ratios; // Ratios of median to quantiles ec01
+	// real ec99_median;			// Median ec99
+	// real ec975_median;			// Median ec975
+	// real ec95_median;			// Median ec95
+	// real ec90_median;			// Median ec90
+	// real ec50_median;			// Median ec50
+	// real ec10_median;			// Median ec10
+	// real ec05_median;			// Median ec05
+	// real ec025_median;			// Median ec025
+	// real ec01_median;			// Median ec01
+	// 
+	// vector[Nquants] ec99_quants;	// Quantiles ec99
+	// vector[Nquants] ec99_quant_ratios;	// Ratios of median to quantiles ec99
+	// vector[Nquants] ec975_quants;	// Quantiles ec975
+	// vector[Nquants] ec975_quant_ratios; // Ratios of median to quantiles ec975
+	// vector[Nquants] ec95_quants;	// Quantiles ec95
+	// vector[Nquants] ec95_quant_ratios; // Ratios of median to quantiles ec95
+	// vector[Nquants] ec90_quants;	// Quantiles ec90
+	// vector[Nquants] ec90_quant_ratios; // Ratios of median to quantiles ec90
+	// vector[Nquants] ec50_quants;	// Quantiles ec50
+	// vector[Nquants] ec50_quant_ratios; // Ratios of median to quantiles ec50
+	// vector[Nquants] ec10_quants;	// Quantiles 
+	// vector[Nquants] ec10_quant_ratios;	// Ratios of median to quantiles
+	// vector[Nquants] ec05_quants;	// Quantiles ec05
+	// vector[Nquants] ec05_quant_ratios; // Ratios of median to quantiles ec05
+	// vector[Nquants] ec025_quants;	// Quantiles ec02.5
+	// vector[Nquants] ec025_quant_ratios;	// Ratios of median to quantiles ec02.5
+	// vector[Nquants] ec01_quants;	// Quantiles ec01
+	// vector[Nquants] ec01_quant_ratios; // Ratios of median to quantiles ec01
 	
 	
 	for (i in 1:Ni) {
@@ -107,74 +107,74 @@ generated quantities {
 		ec025[i] = x0[i]*(0.025 / (1 - 0.025))^(1/n[i]);
 		ec01[i] = x0[i]*(0.01 / (1 - 0.01))^(1/n[i]);
 	}
-	{
-	int ec99_indx[Ni];
-	int ec975_indx[Ni];
-	int ec95_indx[Ni];
-	int ec90_indx[Ni];
-	int ec50_indx[Ni];
-	int ec10_indx[Ni];
-	int ec05_indx[Ni];
-	int ec025_indx[Ni];
-	int ec01_indx[Ni];
-	real p;
-	real m;
-	real g;
-	int i;
-	int itmp;
-	ec99_indx= sort_indices_asc(ec99);
-	ec975_indx= sort_indices_asc(ec975);
-	ec95_indx= sort_indices_asc(ec95);
-	ec90_indx= sort_indices_asc(ec90);
-	ec50_indx= sort_indices_asc(ec50);
-	ec10_indx= sort_indices_asc(ec10);
-	ec05_indx= sort_indices_asc(ec05);
-	ec025_indx= sort_indices_asc(ec025);
-	ec01_indx= sort_indices_asc(ec01);
-	p= 0.5;
-	m=1-p;
-	itmp=1;
-	while (itmp <(Ni*p + m))
-		itmp=itmp+1;
-	i = itmp-1;
-	g = Ni*p + m - i;
-	ec99_median = (1-g)*ec99[ec99_indx[i]]+g*ec99[ec99_indx[i+1]];
-	ec975_median = (1-g)*ec975[ec975_indx[i]]+g*ec975[ec975_indx[i+1]];
-	ec95_median = (1-g)*ec95[ec95_indx[i]]+g*ec95[ec95_indx[i+1]];
-	ec90_median = (1-g)*ec90[ec90_indx[i]]+g*ec90[ec90_indx[i+1]];
-	ec50_median = (1-g)*ec50[ec50_indx[i]]+g*ec50[ec50_indx[i+1]];
-	ec10_median = (1-g)*ec10[ec10_indx[i]]+g*ec10[ec10_indx[i+1]];
-	ec05_median = (1-g)*ec05[ec05_indx[i]]+g*ec05[ec05_indx[i+1]];
-	ec025_median = (1-g)*ec025[ec025_indx[i]]+g*ec025[ec025_indx[i+1]];
-	ec01_median = (1-g)*ec01[ec01_indx[i]]+g*ec01[ec01_indx[i+1]];
-	for (q in 1:Nquants) {
-		p= quants[q];
-		m= 1-p;
-		itmp=1;
-		while (itmp <(Ni*p + m)) 
-			itmp=itmp+1;
-		i = itmp-1;
-		g = Ni*p + m - i;
-		ec99_quants[q] = (1-g)*ec99[ec99_indx[i]]+g*ec99[ec99_indx[i+1]];
-		ec975_quants[q] = (1-g)*ec975[ec975_indx[i]]+g*ec975[ec975_indx[i+1]];
-		ec95_quants[q] = (1-g)*ec95[ec95_indx[i]]+g*ec95[ec95_indx[i+1]];
-		ec90_quants[q] = (1-g)*ec90[ec90_indx[i]]+g*ec90[ec90_indx[i+1]];
-		ec50_quants[q] = (1-g)*ec50[ec50_indx[i]]+g*ec50[ec50_indx[i+1]];
-		ec10_quants[q] = (1-g)*ec10[ec10_indx[i]]+g*ec10[ec10_indx[i+1]];
-		ec05_quants[q] = (1-g)*ec05[ec05_indx[i]]+g*ec05[ec05_indx[i+1]];
-		ec025_quants[q] = (1-g)*ec025[ec025_indx[i]]+g*ec025[ec025_indx[i+1]];
-		ec01_quants[q] = (1-g)*ec01[ec01_indx[i]]+g*ec01[ec01_indx[i+1]];
-	}
-	for (q in 1:Nquants) { 
-		ec99_quant_ratios[q] = ec99_median/ec99_quants[q];
-		ec975_quant_ratios[q] = ec975_median/ec975_quants[q];
-		ec95_quant_ratios[q] = ec95_median/ec95_quants[q];
-		ec90_quant_ratios[q] = ec90_median/ec90_quants[q];
-		ec50_quant_ratios[q] = ec50_median/ec50_quants[q];
-		ec10_quant_ratios[q] = ec10_median/ec10_quants[q];
-		ec05_quant_ratios[q] = ec05_median/ec05_quants[q];
-		ec025_quant_ratios[q] = ec025_median/ec025_quants[q];
-		ec01_quant_ratios[q] = ec01_median/ec01_quants[q];
-	}
-	}
+	// {
+	// int ec99_indx[Ni];
+	// int ec975_indx[Ni];
+	// int ec95_indx[Ni];
+	// int ec90_indx[Ni];
+	// int ec50_indx[Ni];
+	// int ec10_indx[Ni];
+	// int ec05_indx[Ni];
+	// int ec025_indx[Ni];
+	// int ec01_indx[Ni];
+	// real p;
+	// real m;
+	// real g;
+	// int i;
+	// int itmp;
+	// ec99_indx= sort_indices_asc(ec99);
+	// ec975_indx= sort_indices_asc(ec975);
+	// ec95_indx= sort_indices_asc(ec95);
+	// ec90_indx= sort_indices_asc(ec90);
+	// ec50_indx= sort_indices_asc(ec50);
+	// ec10_indx= sort_indices_asc(ec10);
+	// ec05_indx= sort_indices_asc(ec05);
+	// ec025_indx= sort_indices_asc(ec025);
+	// ec01_indx= sort_indices_asc(ec01);
+	// p= 0.5;
+	// m=1-p;
+	// itmp=1;
+	// while (itmp <(Ni*p + m))
+	// 	itmp=itmp+1;
+	// i = itmp-1;
+	// g = Ni*p + m - i;
+	// ec99_median = (1-g)*ec99[ec99_indx[i]]+g*ec99[ec99_indx[i+1]];
+	// ec975_median = (1-g)*ec975[ec975_indx[i]]+g*ec975[ec975_indx[i+1]];
+	// ec95_median = (1-g)*ec95[ec95_indx[i]]+g*ec95[ec95_indx[i+1]];
+	// ec90_median = (1-g)*ec90[ec90_indx[i]]+g*ec90[ec90_indx[i+1]];
+	// ec50_median = (1-g)*ec50[ec50_indx[i]]+g*ec50[ec50_indx[i+1]];
+	// ec10_median = (1-g)*ec10[ec10_indx[i]]+g*ec10[ec10_indx[i+1]];
+	// ec05_median = (1-g)*ec05[ec05_indx[i]]+g*ec05[ec05_indx[i+1]];
+	// ec025_median = (1-g)*ec025[ec025_indx[i]]+g*ec025[ec025_indx[i+1]];
+	// ec01_median = (1-g)*ec01[ec01_indx[i]]+g*ec01[ec01_indx[i+1]];
+	// for (q in 1:Nquants) {
+	// 	p= quants[q];
+	// 	m= 1-p;
+	// 	itmp=1;
+	// 	while (itmp <(Ni*p + m)) 
+	// 		itmp=itmp+1;
+	// 	i = itmp-1;
+	// 	g = Ni*p + m - i;
+	// 	ec99_quants[q] = (1-g)*ec99[ec99_indx[i]]+g*ec99[ec99_indx[i+1]];
+	// 	ec975_quants[q] = (1-g)*ec975[ec975_indx[i]]+g*ec975[ec975_indx[i+1]];
+	// 	ec95_quants[q] = (1-g)*ec95[ec95_indx[i]]+g*ec95[ec95_indx[i+1]];
+	// 	ec90_quants[q] = (1-g)*ec90[ec90_indx[i]]+g*ec90[ec90_indx[i+1]];
+	// 	ec50_quants[q] = (1-g)*ec50[ec50_indx[i]]+g*ec50[ec50_indx[i+1]];
+	// 	ec10_quants[q] = (1-g)*ec10[ec10_indx[i]]+g*ec10[ec10_indx[i+1]];
+	// 	ec05_quants[q] = (1-g)*ec05[ec05_indx[i]]+g*ec05[ec05_indx[i+1]];
+	// 	ec025_quants[q] = (1-g)*ec025[ec025_indx[i]]+g*ec025[ec025_indx[i+1]];
+	// 	ec01_quants[q] = (1-g)*ec01[ec01_indx[i]]+g*ec01[ec01_indx[i+1]];
+	// }
+	// for (q in 1:Nquants) { 
+	// 	ec99_quant_ratios[q] = ec99_median/ec99_quants[q];
+	// 	ec975_quant_ratios[q] = ec975_median/ec975_quants[q];
+	// 	ec95_quant_ratios[q] = ec95_median/ec95_quants[q];
+	// 	ec90_quant_ratios[q] = ec90_median/ec90_quants[q];
+	// 	ec50_quant_ratios[q] = ec50_median/ec50_quants[q];
+	// 	ec10_quant_ratios[q] = ec10_median/ec10_quants[q];
+	// 	ec05_quant_ratios[q] = ec05_median/ec05_quants[q];
+	// 	ec025_quant_ratios[q] = ec025_median/ec025_quants[q];
+	// 	ec01_quant_ratios[q] = ec01_median/ec01_quants[q];
+	// }
+	// }
 }

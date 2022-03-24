@@ -16,9 +16,9 @@ ec10_df <- fitparms_df[,ec10names]
 names(ec10_df) <- as.character(cells)
 write.csv(t(apply(ec10_df,2,quantile,prob=c(0.025,0.5,0.975))),
           file="Table-DON_EC10_CellLine_summary.csv")
-ec10_df.long <- melt(ec10_df)
+ec10_df.long <- pivot_longer(ec10_df,cols = 1:ncol(ec10_df))
 pec10 <- ggplot(ec10_df.long) + 
-  geom_boxplot(aes(x=reorder(variable,value,median),y=value),
+  geom_boxplot(aes(x=reorder(name,value,median),y=value),
                outlier.shape = NA) +
   coord_flip() + scale_y_log10() + ylab("EC10 (uM)") + xlab("Cell Line") +
   theme(axis.title = element_text(size = 15))
@@ -26,9 +26,6 @@ print(pec10)
 ggsave("Figure-DON_EC10.pdf", plot=pec10,width=8,height=10)
 
 ### EC10 Population GM and GSD values
-load("DON_stanfit.RData")
-set.seed(314159)
-fitparms_df <- as.data.frame(rstan::extract(stan_fit))
 ec10.pop <- exp(fitparms_df[,c("m_x10","sd_x10")])
 names(ec10.pop) <- c("EC10.GM","EC10.GSD")
 write.csv(ec10.pop,file="DON-EC10_pop_samples.csv")
@@ -86,7 +83,7 @@ write.csv(t(apply(ec10.pop,2,quantile,prob=c(0.025,0.5,0.975))),
 # cells <- unique(DON_dat$Cell.line)
 # pec10dec <- list()
 # load("DON_stanfit.RData")
-# fitparms_df <- as.data.frame(rstan::extract(stan_fit))[1:500,]
+# fitparms_df <- as.data.frame(rstan::extract(stan_fit))
 # ec10names <- paste("ec10",seq(1,length(cells)),sep=".")
 # ec10_df <- fitparms_df[,ec10names]
 # names(ec10_df) <- as.character(cells)

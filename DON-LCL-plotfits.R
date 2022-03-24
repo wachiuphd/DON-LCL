@@ -37,6 +37,7 @@ data_df <- data.frame(cell=cell,x=x,ys=ys,CellLine=cells[cell])
 pred_df <- data.frame()
 load("DON_stanfit.RData")
 set.seed(314159)
+# Only use 500 samples to save time
 fitparms_df <- as.data.frame(rstan::extract(stan_fit))[1:500,]
 for (cellnum in 1:length(unique(cell))) {
   cat(cellnum,"...",sep="")
