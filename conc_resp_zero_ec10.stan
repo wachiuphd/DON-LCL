@@ -41,7 +41,7 @@ model {
 	vector[Nj] yp;
 	// prior distributions
 	m_y0 ~ normal(0,5);
-	m_x10 ~ normal(0,5);
+	m_x10 ~ normal(0,10);
 	m_n ~ normal(0,1);
 	sd_y0 ~ normal(0,1);
 	sd_x10 ~ normal(0,1);
