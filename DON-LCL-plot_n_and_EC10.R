@@ -7,6 +7,7 @@ DON_dat <- data.frame(read.csv("DON-LCLdata_test.csv"))
 load("DON_stanfit.RData")
 set.seed(314159)
 fitparms_df <- as.data.frame(rstan::extract(stan_fit))
+cells <- unique(DON_dat$Cell.line)
 
 ### n distribution ###
 nnames <- paste("n",seq(1,length(cells)),sep=".")
@@ -28,6 +29,7 @@ ggsave("Figure-DON_n.pdf", plot=pn,width=8,height=10)
 ec10names <- paste("ec10",seq(1,length(cells)),sep=".")
 ec10_df <- fitparms_df[,ec10names]
 names(ec10_df) <- as.character(cells)
+write.csv(ec10_df,"DON_EC10_cellline_samples.csv")
 write.csv(t(apply(ec10_df,2,quantile,prob=c(0.025,0.5,0.975))),
           file="Table-DON_EC10_CellLine_summary.csv")
 ec10_df.long <- pivot_longer(ec10_df,cols = 1:ncol(ec10_df))
