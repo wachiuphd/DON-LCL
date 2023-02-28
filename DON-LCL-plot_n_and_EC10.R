@@ -66,19 +66,19 @@ ggsave("Figure-DON-EC10_pop.GSD_compare_prior.pdf",height=3,width=5)
 prior.dens$x.tdvf05 <- prior.dens$x.gsd^qnorm(0.95)
 prior.dens$density.tdvf05 <- prior.dens$density.gsd/qnorm(0.95)
 ec10.pop$TDVF05 <- ec10.pop$EC10.GSD^qnorm(0.95)
-ggplot(ec10.pop)+geom_histogram(aes(x=TDVF05,y=..density..))+
+TDVF05<- ggplot(ec10.pop)+geom_histogram(aes(x=TDVF05,y=..density..))+
   geom_line(aes(x.tdvf05,density.tdvf05),data=prior.dens)+
   geom_vline(xintercept=10^(0.5),color="red",linetype="dotted")+
   scale_x_log10(limits=c(1,30))+annotation_logticks(side="b")+theme_bw()
-ggsave("Figure-DON-EC10_pop.TDVF05_compare_prior.pdf",height=3,width=5)
+ggsave(plot=TDVF05, "Figure-DON-EC10_pop.TDVF05_compare_prior.pdf",height=3,width=5)
 ec10.pop$TDVF01 <- ec10.pop$EC10.GSD^qnorm(0.99)
 prior.dens$x.tdvf01 <- prior.dens$x.gsd^qnorm(0.99)
 prior.dens$density.tdvf01 <- prior.dens$density.gsd/qnorm(0.99)
-ggplot(ec10.pop)+geom_histogram(aes(x=TDVF01,y=..density..))+
+TDVF01<- ggplot(ec10.pop)+geom_histogram(aes(x=TDVF01,y=..density..))+
   geom_line(aes(x.tdvf01,density.tdvf01),data=prior.dens)+
   geom_vline(xintercept=10^(0.5),color="red",linetype="dotted")+
   scale_x_log10(limits=c(1,30))+annotation_logticks(side="b")+theme_bw()
-ggsave("Figure-DON-EC10_pop.TDVF01_compare_prior.pdf",height=3,width=5)  
+ggsave(plot=TDVF01, "Figure-DON-EC10_pop.TDVF01_compare_prior.pdf",height=3,width=5)  
 
 write.csv(t(apply(ec10.pop,2,quantile,prob=c(0.025,0.5,0.975))),
           "Table-EC10.pop_posteriors.csv")

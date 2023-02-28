@@ -38,7 +38,7 @@ ggplot(DON_dat)+  geom_point(aes(x=conc,y=value))+
 
 quants <- c(0.01,0.025,0.05,0.1,0.25,0.5,0.75,0.9,0.95,0.975,0.99)
 xplot<-10^(seq(-10,35)/10)
-scale_factor <- 100
+scale_factor <- 100 #Emax
 
 DONstan_dat <- list(
     scale_factor = scale_factor,

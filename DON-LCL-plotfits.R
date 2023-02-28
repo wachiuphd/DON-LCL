@@ -22,7 +22,7 @@ p <- ggplot(DON_dat)+
 print(p)
 
 ###plot fits###
-xplot<-10^(seq(-10,35)/10)
+xplot<-10^(seq(-20,35)/10)
 cells <- unique(DON_dat$Cell.line)
 pfit <- list()
 source("DONstan_dat.R")
@@ -58,13 +58,19 @@ for (cellnum in 1:length(unique(cell))) {
   pred_df <- rbind(pred_df,pred_sum)
 }
 
-cat("\n")
+cat("\n") #limits=c(0.01,1000)
+breaks_log10 <- function(x) {
+  low <- floor(log10(min(x)))
+  high <- ceiling(log10(max(x)))
+  10^(seq.int(low, high))
+}
 pfit <- ggplot(pred_df) + 
-  scale_x_log10() +
+  scale_x_log10(breaks = breaks_log10) +
   geom_ribbon(data=pred_df,aes(x=x,ymin=y025,ymax=y975),
               fill="grey",color="grey")+
   geom_line(data=pred_df,aes(x=x,y=y50),color="red") +
   geom_point(aes(x=x,y=ys),data=data_df,size=0.2) + 
+  theme_bw() +
   theme(axis.text.x = element_text(angle = 90), 
         axis.title = element_text(size = 15))+
   facet_wrap(~CellLine,ncol=11)+
