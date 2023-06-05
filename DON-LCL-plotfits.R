@@ -65,16 +65,16 @@ breaks_log10 <- function(x) {
   10^(seq.int(low, high))
 }
 pfit <- ggplot(pred_df) + 
-  scale_x_log10(breaks = breaks_log10) +
+  scale_x_log10(breaks = breaks_log10, 
+                labels = scales::trans_format("log10", scales::math_format(10^.x)))+
   geom_ribbon(data=pred_df,aes(x=x,ymin=y025,ymax=y975),
               fill="grey",color="grey")+
   geom_line(data=pred_df,aes(x=x,y=y50),color="red") +
   geom_point(aes(x=x,y=ys),data=data_df,size=0.2) + 
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 90), 
-        axis.title = element_text(size = 15))+
+  theme(axis.text.x=element_text(angle=45, size=7), axis.title = element_text(size = 15))+
   facet_wrap(~CellLine,ncol=11)+
-  xlab("Concentration (uM)")+
+  xlab("Concentration (μM)")+
   ylab("Viability")
 print(pfit)
 ggsave("Figure-DON_fit.pdf", plot=pfit,width=8, height=10)

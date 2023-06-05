@@ -2,6 +2,7 @@ library(tidyverse)
 library(ggplot2)
 library(parallel)
 library(rstan)
+library(ggpubr)
 
 DON_dat <- data.frame(read.csv("DON-LCLdata_test.csv"))
 load("DON_stanfit.RData")
@@ -36,10 +37,10 @@ ec10_df.long <- pivot_longer(ec10_df,cols = 1:ncol(ec10_df))
 pec10 <- ggplot(ec10_df.long) + 
   geom_boxplot(aes(x=reorder(name,value,median),y=value),
                outlier.shape = NA) +
-  coord_flip() + scale_y_log10() + ylab("EC10 (uM)") + xlab("Cell Line") +
+  coord_flip() + scale_y_log10() + ylab(bquote(EC[10])) + xlab("Cell Line") +
   theme(axis.title = element_text(size = 15))
 print(pec10)
-ggsave("Figure-DON_EC10.pdf", plot=pec10,width=8,height=10)
+ggsave("Figure-DON_EC10.pdf", plot=pec10,width=8,height=11)
 
 ### EC10 Population GM and GSD values
 ec10.pop <- exp(fitparms_df[,c("m_x10","sd_x10")])
@@ -69,7 +70,9 @@ ec10.pop$TDVF05 <- ec10.pop$EC10.GSD^qnorm(0.95)
 TDVF05<- ggplot(ec10.pop)+geom_histogram(aes(x=TDVF05,y=..density..))+
   geom_line(aes(x.tdvf05,density.tdvf05),data=prior.dens)+
   geom_vline(xintercept=10^(0.5),color="red",linetype="dotted")+
-  scale_x_log10(limits=c(1,30))+annotation_logticks(side="b")+theme_bw()
+  scale_x_log10(limits=c(1,30))+annotation_logticks(side="b")+theme_bw()+
+  xlab(bquote(TDVF["05"]))
+print(TDVF05)
 ggsave(plot=TDVF05, "Figure-DON-EC10_pop.TDVF05_compare_prior.pdf",height=3,width=5)
 ec10.pop$TDVF01 <- ec10.pop$EC10.GSD^qnorm(0.99)
 prior.dens$x.tdvf01 <- prior.dens$x.gsd^qnorm(0.99)
@@ -77,8 +80,12 @@ prior.dens$density.tdvf01 <- prior.dens$density.gsd/qnorm(0.99)
 TDVF01<- ggplot(ec10.pop)+geom_histogram(aes(x=TDVF01,y=..density..))+
   geom_line(aes(x.tdvf01,density.tdvf01),data=prior.dens)+
   geom_vline(xintercept=10^(0.5),color="red",linetype="dotted")+
-  scale_x_log10(limits=c(1,30))+annotation_logticks(side="b")+theme_bw()
-ggsave(plot=TDVF01, "Figure-DON-EC10_pop.TDVF01_compare_prior.pdf",height=3,width=5)  
+  scale_x_log10(limits=c(1,30))+annotation_logticks(side="b")+theme_bw()+
+  xlab(bquote(TDVF["01"]))
+print(TDVF01)
+ggsave(plot=TDVF01, "Figure-DON-EC10_pop.TDVF01_compare_prior.pdf",height=3,width=5)
+TDVF <- ggarrange(TDVF05, TDVF01, labels = c("A", "B"), ncol = 2, nrow = 1)
+ggsave("TDVF_figure.pdf", plot=TDVF, scale=0.5, width=20, height=8)
 
 write.csv(t(apply(ec10.pop,2,quantile,prob=c(0.025,0.5,0.975))),
           "Table-EC10.pop_posteriors.csv")
