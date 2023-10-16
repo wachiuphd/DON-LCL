@@ -37,8 +37,10 @@ ec10_df.long <- pivot_longer(ec10_df,cols = 1:ncol(ec10_df))
 pec10 <- ggplot(ec10_df.long) + 
   geom_boxplot(aes(x=reorder(name,value,median),y=value),
                outlier.shape = NA) +
-  coord_flip() + scale_y_log10() + ylab(bquote(EC[10])) + xlab("Cell Line") +
-  theme(axis.title = element_text(size = 15))
+  coord_flip() + scale_y_log10() + ylab(bquote(EC[10]~(µM))) + xlab("Cell Line") +
+  theme_bw()+
+  theme(axis.title = element_text(size = 15), axis.text.x = element_text(size=14),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 print(pec10)
 ggsave("Figure-DON_EC10.pdf", plot=pec10,width=8,height=11)
 
